@@ -15,7 +15,7 @@ char FM_UserName[18];
 char FM_IP[18];
 char FM_VER[18];
 char FM_ID[12]; //PrusaLab
-char FM_Mode[6]; //Prusalab - there are two types of modes 'member' - print for members, 'master' - prints for custom-made orders
+char FM_Mode[6]; //Prusalab - there are two types of modes 'member' - print for members, 'master' - prints for custom-made orders (projects)
 bool lock_FM_FW_TYPE = 0;
 bool selected_FM_FW_TYPE = 0;
 /*#FLB*/
