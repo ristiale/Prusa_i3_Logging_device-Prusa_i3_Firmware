@@ -9,8 +9,8 @@ extern char *strchr_pointer;
 extern int Fabman_mode;
 extern bool stoppedInfo;
 extern char FM_UserName[18]; //PrusaLab
-extern char FM_ID[12]; //PrusaLab
-extern char FM_Mode[6]; //Prusalab
+extern char FM_ID[13]; //PrusaLab
+extern char FM_Mode[7]; //Prusalab
 
 void lcd_FM_login();
 void serial_FM_login();
@@ -73,7 +73,6 @@ void filament_used_in_last_print() {
   SERIAL_ECHO("UserName: "); //PrusaLab
   SERIAL_ECHOLN(FM_UserName); //PrusaLab
   SERIAL_ECHO("UserID: "); //PrusaLab
-  FM_ID[12] = '\0'; // Had to be added due to unindentified error during print
   SERIAL_ECHOLN(FM_ID); //PrusaLab
   SERIAL_ECHO("UserMode: "); //PrusaLab
   SERIAL_ECHOLN(FM_Mode); //PrusaLab
@@ -142,6 +141,8 @@ void serial_FM_login() {
 }
 
 void serial_FM_logoff() {
+  disable_heater();
+  finishAndDisableSteppers(); //disable steppers
   SERIAL_PROTOCOLLN("Serial FM logoff");
   Fabman_mode = 1;
   SERIAL_ECHO("Fabman mode = ");

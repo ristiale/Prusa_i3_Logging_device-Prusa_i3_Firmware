@@ -7,6 +7,9 @@
 #include "stepper.h"
 #include "temperature.h"
 #include "language.h"
+#include "mmu.h" //PrusaLab
+#include "mesh_bed_leveling.h" //PrusaLab
+#include "Configuration_prusa.h" //PrusaLAb
 
 #ifdef SDSUPPORT
 
@@ -15,6 +18,11 @@
 /*#FLB*/
 extern bool fileExist;
 extern void getConfigFromJSON();
+extern void serial_FM_logoff(); //PrusaLab
+extern void check_FM_login(); //PrusaLab
+extern void lcd_FM_login();
+static uint8_t lcd_commands_step = 0;
+static float manual_feedrate[] = MANUAL_FEEDRATE;
 /*#FLB*/
 
 CardReader::CardReader()
@@ -280,6 +288,79 @@ void CardReader::setroot(bool doPresort)
 }
 void CardReader::release()
 {
+  /* PrusaLab */
+  if(sdprinting == true)
+  {
+    // Message on LCD
+    lcd_update_enable(false);
+    lcd_clear();
+    lcd_puts_P(PSTR("\nSD karta vyjmuta!")); //PrusaLab
+
+    // ********** lcd_print_stop(); *************
+
+    cmdqueue_serial_disabled = false; //for when canceling a print with a fancheck
+
+    CRITICAL_SECTION_START;
+
+    // Clear any saved printing state
+    cancel_saved_printing();
+
+    // Abort the planner/queue/sd
+    planner_abort_hard();
+    cmdqueue_reset();
+    st_reset_timer();
+
+    CRITICAL_SECTION_END;
+
+  #ifdef MESH_BED_LEVELING
+    mbl.active = false; //also prevents undoing the mbl compensation a second time in the second planner_abort_hard()
+  #endif 
+
+    stoptime = _millis();
+    unsigned long t = (stoptime - starttime - pause_time) / 1000; //time in s
+    pause_time = 0;
+
+    save_statistics(total_filament_used, t);
+
+    lcd_commands_step = 0;
+    lcd_commands_type = LcdCommands::Idle;
+
+    cancel_heatup = true; //unroll temperature wait loop stack.
+
+    current_position[Z_AXIS] += 10; //lift Z.
+    plan_buffer_line_curposXYZE(manual_feedrate[Z_AXIS] / 60);
+
+    if (axis_known_position[X_AXIS] && axis_known_position[Y_AXIS]) //if axis are homed, move to parked position.
+    {
+        current_position[X_AXIS] = X_CANCEL_POS;
+        current_position[Y_AXIS] = Y_CANCEL_POS;
+        plan_buffer_line_curposXYZE(manual_feedrate[0] / 60);
+    }
+    st_synchronize();
+
+    if (mmu_enabled) extr_unload(); //M702 C
+
+    planner_abort_hard(); //needs to be done since plan_buffer_line resets waiting_inside_plan_buffer_line_print_aborted to false. Also copies current to destination.
+    
+    cmdqueue_reset();
+
+    axis_relative_modes = E_AXIS_MASK; //XYZ absolute, E relative
+    
+    isPrintPaused = false; //clear isPrintPaused flag to allow starting next print after pause->stop scenario.*/
+
+    disable_heater(); //safety feature
+    finishAndDisableSteppers(); //M84
+
+    // Wait for button press
+    lcd_wait_for_click_delay(0);
+    lcd_update_enable(true);
+    lcd_clear();
+    lcd_update(0);
+    
+    serial_FM_logoff();
+
+  }
+  /* PrusaLab */
   sdprinting = false;
   cardOK = false;
   SERIAL_ECHO_START;

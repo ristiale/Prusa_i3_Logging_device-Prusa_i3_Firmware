@@ -4,7 +4,7 @@
 #include "temperature.h" //PrusaLab
 
 extern bool file_check; //PrusaLab
-extern char FM_Mode[6]; //PrusaLab
+extern char FM_Mode[7]; //PrusaLab
 extern char FM_UserName[18]; //PrusaLab
 extern bool project; //PrusaLab
 extern void serial_FM_logoff(); //PrusaLab

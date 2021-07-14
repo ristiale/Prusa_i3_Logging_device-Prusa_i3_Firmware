@@ -59,16 +59,18 @@ extern int Fabman_mode;
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
-extern char FM_ID[12]; //PrusaLab
-extern char FM_Mode[6]; //Prusalab
+extern char FM_ID[13]; //PrusaLab
+extern char FM_Mode[7]; //Prusalab
 bool project; //Prusalab
 extern void serial_FM_logoff(); //PrusaLab
 extern void show_user_name_after_print(); //PrusaLab
+extern void check_FM_login();
 extern bool lock_FM_FW_TYPE;
 extern bool selected_FM_FW_TYPE;
 extern char *username;
 bool stoppedInfo;
 bool file_check;
+extern bool sdprinting;
 
 void lcd_FM_FW_type_set() {
 	// Lock for one-time change
@@ -7261,23 +7263,22 @@ void lcd_print_stop()
 	stoptime = _millis();
 	unsigned long t = (stoptime - starttime - pause_time) / 1000; //time in s
 	pause_time = 0;
-  /*#FLB*/
-  stoppedInfo = 1;
   /*PrusaLab*/
-  if(!((FM_Mode[0] == 'm') && (FM_Mode[1] == 'a') && (FM_Mode[2] == 's') && (project == false)))
-  {
-	disable_heater(); //safety feature
-	print_successful = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Print ok ?"), false, true);
-	if(print_successful == true) // PrusaLab modification
-		{
-			filament_used_in_last_print();
-			time_used_in_last_print = t;
-		}
-		lcd_update_enable(true);
-  }
-  show_user_name_after_print();
-  SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
-  serial_FM_logoff();
+	stoppedInfo = 1;
+	if(!((FM_Mode[0] == 'm') && (FM_Mode[1] == 'a') && (FM_Mode[2] == 's') && (project == false)))
+	{
+		disable_heater(); //safety feature
+		print_successful = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Print ok ?"), false, true);
+		if(print_successful == true) // PrusaLab modification
+			{
+				filament_used_in_last_print();
+				time_used_in_last_print = t;
+			}
+			lcd_update_enable(true);
+	}
+	show_user_name_after_print();
+	SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
+	serial_FM_logoff();
   /*PrusaLab*/
   /*#FLB*/
 	save_statistics(total_filament_used, t);
@@ -7303,8 +7304,8 @@ void lcd_print_stop()
 
     finishAndDisableSteppers(); //M84
 
-    lcd_setstatuspgm(_T(WELCOME_MSG));
-    custom_message_type = CustomMsg::Status;
+	lcd_setstatuspgm(_T(WELCOME_MSG));
+	custom_message_type = CustomMsg::Status;
 
     planner_abort_hard(); //needs to be done since plan_buffer_line resets waiting_inside_plan_buffer_line_print_aborted to false. Also copies current to destination.
     

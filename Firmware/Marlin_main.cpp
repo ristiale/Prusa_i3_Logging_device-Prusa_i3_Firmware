@@ -165,8 +165,8 @@ extern void show_user_name_after_print();
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
-extern char FM_ID[12]; //PrusaLab
-extern char FM_Mode[6]; //Prusalab
+extern char FM_ID[13]; //PrusaLab
+extern char FM_Mode[7]; //Prusalab
 extern bool project; //Prusalab
 extern bool lock_FM_FW_TYPE;
 extern bool selected_FM_FW_TYPE;
@@ -4389,10 +4389,10 @@ void process_commands()
       
       // If first three characters are "ID:", save id of the card
       else if((input_data[0] == 'I') && (input_data[1] == 'D') && (input_data[2] == ':')){
-        for(int i=0; i<=12; i++) {
+        for(int i=0; i<=array_size; i++) {
           FM_ID[i] = input_data[i+3];
         }
-        FM_ID[12] = '\0';
+        FM_ID[array_size] = '\0';
         SERIAL_ECHO("UNM ID: ");
         SERIAL_ECHOLN(FM_ID);
       }
