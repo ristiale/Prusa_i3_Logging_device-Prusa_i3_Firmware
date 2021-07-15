@@ -10317,24 +10317,7 @@ void Stop()
     Stopped_gcode_LastN = gcode_LastN; // Save last g_code for restart
     SERIAL_ERROR_START;
     SERIAL_ERRORLNRPGM(MSG_ERR_STOPPED);
-    LCD_MESSAGERPGM(_T(MSG_STOPPED));
-    
-    /*PrusaLab*/
-    if(!((FM_Mode[0] == 'm') && (FM_Mode[1] == 'a') && (FM_Mode[2] == 's') && (project == false))) //checks user mode and if is project active
-    {
-      disable_heater(); //safety feature
-      print_successful = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Print ok ?"), false, true);
-      lcd_update_enable(true);
-      if(print_successful == true) // PrusaLab modification
-      {
-        filament_used_in_last_print();
-      }  
-      //filament_used_in_last_print(); // #FLB
-    }
-    show_user_name_after_print();
-    SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
-    serial_FM_logoff();
-    /*PrusaLab*/
+    LCD_MESSAGERPGM(_T(MSG_STOPPED));  
   }
 }
 

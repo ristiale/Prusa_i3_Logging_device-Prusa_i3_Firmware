@@ -2,6 +2,7 @@
 #include "cardreader.h"
 #include "ultralcd.h"
 #include "temperature.h" //PrusaLab
+#include "mmu.h" //PrusaLab
 
 extern bool file_check; //PrusaLab
 extern char FM_Mode[7]; //PrusaLab
@@ -9,6 +10,7 @@ extern char FM_UserName[18]; //PrusaLab
 extern bool project; //PrusaLab
 extern void serial_FM_logoff(); //PrusaLab
 extern void show_user_name_after_print(); // PrusaLab
+static uint8_t lcd_commands_step = 0; //PrusaLab
 extern bool Stopped;
 
 // Reserve BUFSIZE lines of length MAX_CMD_SIZE plus CMDBUFFER_RESERVE_FRONT.
@@ -689,9 +691,11 @@ void get_command()
                     time_used_in_last_print = t;
                     filament_used_in_last_print();
                     lcd_update_enable(true);
+                    show_user_name_after_print();
+                    SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
+                    serial_FM_logoff();
                 }
-
-                /*if(print_successful == false)
+                else if(print_successful == false)
                 {
                     bool result;
                     result = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Restart print ?"), false, false);
@@ -699,24 +703,22 @@ void get_command()
                     {
                         lcd_clear();
                         lcd_update_enable(true);
-                        card.closefile();
-                        card.openFile(card.filename, true);
+                        card.openFileReadFilteredGcode(card.filename, true, true);
+                        starttime = _millis();
+                        pause_time = 0;
+                        total_filament_used = 0;
+                        card.startFileprint();
                     }
-                    if(result == false)
+                    else if(result == false)
                     {
+                        lcd_update_enable(true);
                         show_user_name_after_print();
                         SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
                         serial_FM_logoff();
                     }
-                }*/
-
+                }
             }
-            //else{
-            show_user_name_after_print();
-            SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
-            serial_FM_logoff();
             file_check = false;
-            //}
           }
         /*#FLB and PrusaLab*/
 

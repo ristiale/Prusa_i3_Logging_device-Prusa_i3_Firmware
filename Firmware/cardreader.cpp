@@ -493,7 +493,7 @@ static const char ofFileSelected[] PROGMEM = "File selected";
 static const char ofSDPrinting[] PROGMEM = "SD-PRINTING";
 static const char ofWritingToFile[] PROGMEM = "Writing to file: ";
 
-void CardReader::openFileReadFilteredGcode(const char* name, bool replace_current/* = false*/){
+void CardReader::openFileReadFilteredGcode(const char* name, bool replace_current/* = false*/, bool restart = false){
     if(!cardOK)
         return;
     
@@ -539,8 +539,11 @@ void CardReader::openFileReadFilteredGcode(const char* name, bool replace_curren
       return;
   
     if (file.openFilteredGcode(curDir, fname)) {
-        getfilename(0, fname);
-        filesize = file.fileSize();
+        if(restart == false) // PrusaLab
+        {
+          getfilename(0, fname);
+          filesize = file.fileSize();
+        }
         SERIAL_PROTOCOLRPGM(ofFileOpened);////MSG_SD_FILE_OPENED
         printAbsFilenameFast();
         SERIAL_PROTOCOLRPGM(ofSize);////MSG_SD_SIZE

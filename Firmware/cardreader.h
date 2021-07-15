@@ -35,7 +35,7 @@ public:
 
   void checkautostart(bool x); 
   void openFileWrite(const char* name);
-  void openFileReadFilteredGcode(const char* name, bool replace_current = false);
+  void openFileReadFilteredGcode(const char* name, bool replace_current = false, bool restart = false);
   void openLogFile(const char* name);
   void removeFile(const char* name);
   void closefile(bool store_location=false);

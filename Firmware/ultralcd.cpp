@@ -7266,19 +7266,64 @@ void lcd_print_stop()
   /*PrusaLab*/
 	stoppedInfo = 1;
 	if(!((FM_Mode[0] == 'm') && (FM_Mode[1] == 'a') && (FM_Mode[2] == 's') && (project == false)))
-	{
-		disable_heater(); //safety feature
-		print_successful = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Print ok ?"), false, true);
-		if(print_successful == true) // PrusaLab modification
-			{
-				filament_used_in_last_print();
-				time_used_in_last_print = t;
-			}
-			lcd_update_enable(true);
-	}
-	show_user_name_after_print();
-	SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
-	serial_FM_logoff();
+    {
+      disable_heater(); //safety feature
+      print_successful = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Print ok ?"), false, true);
+
+      if(print_successful == true) // PrusaLab modification
+      {
+        filament_used_in_last_print();
+        lcd_update_enable(true);
+        show_user_name_after_print();
+        SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
+        serial_FM_logoff();
+      }
+      else if(print_successful == false)
+      {
+        bool result;
+        result = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Restart print ?"), false, false);
+        if(result == true)
+        {
+            lcd_clear();
+            lcd_update_enable(true);
+            card.openFileReadFilteredGcode(card.filename, true, true);
+            starttime = _millis();
+            pause_time = 0;
+            total_filament_used = 0;
+            card.startFileprint();
+        }
+        else if(result == false)
+        {
+            lcd_update_enable(true);
+            show_user_name_after_print();
+            SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
+            serial_FM_logoff();
+        }
+      }
+    }
+    else
+    {
+      bool result;
+        result = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Restart print ?"), false, false);
+        if(result == true)
+        {
+            lcd_clear();
+            lcd_update_enable(true);
+            card.openFileReadFilteredGcode(card.filename, true, true);
+            starttime = _millis();
+            pause_time = 0;
+            total_filament_used = 0;
+            card.startFileprint();
+        }
+        else if(result == false)
+        {
+            lcd_update_enable(true);
+            show_user_name_after_print();
+            SERIAL_PROTOCOLLNRPGM(_n("Done printing file"));////MSG_FILE_PRINTED
+            serial_FM_logoff();
+        }
+    }
+	
   /*PrusaLab*/
   /*#FLB*/
 	save_statistics(total_filament_used, t);
